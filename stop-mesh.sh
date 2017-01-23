@@ -6,6 +6,8 @@ MESH_ID=mesh_test
 
 # down
 #iw dev $MESH_IFACE leave
-iw dev $MESI_ID del 
-ifconfig wlan0 up
+iw $MESH_IFACE del 
+service NetworkManager start
+
+#ifconfig wlan0 up
 # Sometimes: disconnect and connect wi-fi device
