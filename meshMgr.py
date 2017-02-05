@@ -5,8 +5,10 @@ import commands, sys
 from time import sleep
 
 meshIf = "mesh1"
-bssId= "mesh_test"
+meshId= "mesh_test"
 meshAddr= "192.168.55."
+w_s_conf = "./wpa_supplicant.conf"
+ctrl_if="/var/run/wpa_supplicant"
 
 def getNumAdp(sList):
   cnt = 0
@@ -16,7 +18,8 @@ def getNumAdp(sList):
     cnt += 1
   return cnt
  
-def startSvc():
+def startMesh():
+  print "start mesh"
   # stop network service
   commands.getoutput("service NetworkManager stop")
   commands.getoutput("killall wpa_supplicant")
@@ -37,8 +40,8 @@ def startSvc():
   if len(wlanIf) < 5:
     print "Can not find wlan IF."
     sys.exit()
-  print "mac:%s" % (mac)
-  lastAddr = int(mac, 16) # last byte of mac addr
+  #print "mac:%s" % (mac)
+  lastAddr = int(mac, 16) | 0x7f # refer last byte of mac addr
 
   commands.getoutput("ifconfig %s down" % wlanIf)
   commands.getoutput("iw reg set JP")
@@ -47,9 +50,17 @@ def startSvc():
   sleep(5)
   commands.getoutput("ifconfig %s down" % (wlanIf))
   commands.getoutput("ifconfig %s %s%d" % (meshIf, meshAddr, lastAddr))
-  print commands.getoutput("iw dev %s info" % (meshIf))
+  print commands.getoutput("ifconfig %s | head -n 2" % (meshIf))
 
-def stopSvc():
+  #commands.getoutput("ifconfig $s mesh join %s" % (meshIf, meshId))
+  #test commands.getoutput("wpa_supplicant -d -Dnl80211 -i%s -c %s -B" % (meshIf, w_s_conf))
+  sleep(10)
+  print "mesh station dump"
+  print commands.getoutput("iw dev %s station dump" % (meshIf))
+
+def stopMesh():
+  print "stop mesh"
+  #commands.getoutput("wpa_cli -p %s -i%s \"terminate\"" % (w_s_conf, meshIf))
   commands.getoutput("iw dev %s del" % (meshIf))
   commands.getoutput("service NetworkManager start")
 
@@ -64,8 +75,15 @@ argc = len(argvs) # prameter number
 if argc != 2:
   print_help()
   sys.exit()
-if argvs[1] == "start":
-  startSvc()
-elif argvs[1] == "stop":
-  stopSvc()
+cmd = argvs[1].lower()
+if cmd == "start":
+  startMesh()
+elif cmd == "stop":
+  stopMesh()
+elif cmd == "restart":
+  stopMesh()
+  startMesh()
+else:
+  print "no action for the command \"%s\"" % (argvs[1])
+print "finished."
 
