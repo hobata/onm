@@ -53,7 +53,7 @@ def startMesh():
   print commands.getoutput("ifconfig %s | head -n 2" % (meshIf))
 
   #commands.getoutput("ifconfig $s mesh join %s" % (meshIf, meshId))
-  #test commands.getoutput("wpa_supplicant -d -Dnl80211 -i%s -c %s -B" % (meshIf, w_s_conf))
+  #test commands.getoutput("./wpa_supplicant -d -Dnl80211 -i%s -c %s -B" % (meshIf, w_s_conf))
   sleep(10)
   print "mesh station dump"
   print commands.getoutput("iw dev %s station dump" % (meshIf))
